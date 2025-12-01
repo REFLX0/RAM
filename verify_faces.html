@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Face Database Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            padding: 20px;
+        }
+        .person {
+            margin: 20px 0;
+            padding: 20px;
+            background: #16213e;
+            border-radius: 10px;
+        }
+        .person h2 {
+            margin-top: 0;
+            color: #00ff88;
+        }
+        .images {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .images img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #333;
+        }
+        .similarity-matrix {
+            margin-top: 30px;
+            padding: 20px;
+            background: #16213e;
+            border-radius: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+        th {
+            background: #0f3460;
+        }
+        .low { background: #00ff8855; }
+        .medium { background: #ffff0055; }
+        .high { background: #ff000055; }
+    </style>
+</head>
+<body>
+    <h1>Face Database Verification</h1>
+    
+    <div class="person">
+        <h2>12 - Aziz Jlassi</h2>
+        <div class="images">
+            <img src="training_data/12_aziz_jlassi/cropped/center_cropped.jpg" alt="center">
+            <img src="training_data/12_aziz_jlassi/cropped/left_cropped.jpg" alt="left">
+            <img src="training_data/12_aziz_jlassi/cropped/right_cropped.jpg" alt="right">
+            <img src="training_data/12_aziz_jlassi/cropped/up_cropped.jpg" alt="up">
+        </div>
+    </div>
+    
+    <div class="person">
+        <h2>13 - Ala Amara</h2>
+        <div class="images">
+            <img src="training_data/13_ala__amara_/cropped/center_cropped.jpg" alt="center">
+            <img src="training_data/13_ala__amara_/cropped/left_cropped.jpg" alt="left">
+            <img src="training_data/13_ala__amara_/cropped/right_cropped.jpg" alt="right">
+            <img src="training_data/13_ala__amara_/cropped/up_cropped.jpg" alt="up">
+        </div>
+    </div>
+    
+    <div class="person">
+        <h2>14 - Aidh Amri</h2>
+        <div class="images">
+            <img src="training_data/14_aidh__amri_/cropped/center_cropped.jpg" alt="center">
+            <img src="training_data/14_aidh__amri_/cropped/left_cropped.jpg" alt="left">
+            <img src="training_data/14_aidh__amri_/cropped/right_cropped.jpg" alt="right">
+            <img src="training_data/14_aidh__amri_/cropped/up_cropped.jpg" alt="up">
+        </div>
+    </div>
+    
+    <div class="similarity-matrix">
+        <h2>Similarity Matrix (Lower is better for different people)</h2>
+        <table>
+            <tr>
+                <th></th>
+                <th>Aziz</th>
+                <th>Ala</th>
+                <th>Aidh</th>
+            </tr>
+            <tr>
+                <th>Aziz</th>
+                <td>1.00</td>
+                <td class="medium">0.56</td>
+                <td class="high">0.80</td>
+            </tr>
+            <tr>
+                <th>Ala</th>
+                <td class="medium">0.56</td>
+                <td>1.00</td>
+                <td class="medium">0.56</td>
+            </tr>
+            <tr>
+                <th>Aidh</th>
+                <td class="high">0.80</td>
+                <td class="medium">0.56</td>
+                <td>1.00</td>
+            </tr>
+        </table>
+        <p style="margin-top: 15px;">
+            <span style="background: #00ff8855; padding: 3px 10px;">< 0.4 Good</span>
+            <span style="background: #ffff0055; padding: 3px 10px;">0.4-0.6 Medium</span>
+            <span style="background: #ff000055; padding: 3px 10px;">> 0.6 High (might be same person)</span>
+        </p>
+    </div>
+    
+    <p style="margin-top: 20px; color: #888;">
+        Open this file at: <a href="http://localhost:3001/verify_faces.html" style="color: #00ff88;">http://localhost:3001/verify_faces.html</a>
+    </p>
+</body>
+</html>

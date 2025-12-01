@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Gym Security System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-shield-halved"></i>
+                <h2>Gym Security</h2>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="#dashboard" class="nav-item active" onclick="showSection('dashboard')">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#members" class="nav-item" onclick="showSection('members')">
+                    <i class="fas fa-users"></i>
+                    <span>Members</span>
+                </a>
+                <a href="#register" class="nav-item" onclick="showSection('register')">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Register New</span>
+                </a>
+                <a href="#access-logs" class="nav-item" onclick="showSection('access-logs')">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Access Logs</span>
+                </a>
+                <a href="scanner.html" class="nav-item" target="_blank">
+                    <i class="fas fa-camera"></i>
+                    <span>Face Scanner</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <h1 id="page-title">Dashboard Overview</h1>
+                <div class="header-actions">
+                    <span class="admin-info">
+                        <i class="fas fa-user-shield"></i>
+                        Admin
+                    </span>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card primary">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Total Members</h3>
+                            <p class="stat-number" id="total-members">0</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card success">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Access Granted Today</h3>
+                            <p class="stat-number" id="today-access">0</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card danger">
+                        <div class="stat-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Access Denied Today</h3>
+                            <p class="stat-number" id="today-denied">0</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card info">
+                        <div class="stat-icon">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Success Rate</h3>
+                            <p class="stat-number" id="success-rate">0%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>Recent Members</h3>
+                        <div id="recent-members" class="members-list">
+                            <p class="loading">Loading...</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Membership Distribution</h3>
+                        <canvas id="membership-chart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Members Section -->
+            <section id="members-section" class="content-section">
+                <div class="section-header">
+                    <input type="text" id="search-members" placeholder="Search members..." class="search-input">
+                    <button class="btn btn-primary" onclick="showSection('register')">
+                        <i class="fas fa-plus"></i> Add New Member
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div id="members-table-container">
+                        <table class="data-table" id="members-table">
+                            <thead>
+                                <tr>
+                                    <th>Photo</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Membership</th>
+                                    <th>Last Access</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="members-tbody">
+                                <tr>
+                                    <td colspan="7" class="loading">Loading members...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Register Section -->
+            <section id="register-section" class="content-section">
+                <div class="card form-card">
+                    <h3>Register New Member</h3>
+                    <form id="register-form" enctype="multipart/form-data">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName">First Name *</label>
+                                <input type="text" id="firstName" name="firstName" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="lastName">Last Name *</label>
+                                <input type="text" id="lastName" name="lastName" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email">Email *</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phone">Phone</label>
+                                <input type="tel" id="phone" name="phone">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="membershipType">Membership Type *</label>
+                            <select id="membershipType" name="membershipType" required>
+                                <option value="standard">Standard</option>
+                                <option value="premium">Premium</option>
+                                <option value="vip">VIP</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="membershipDuration">Membership Duration *</label>
+                            <select id="membershipDuration" name="membershipDuration" required>
+                                <option value="1">1 Day</option>
+                                <option value="7">1 Week (7 Days)</option>
+                                <option value="30" selected>1 Month (30 Days)</option>
+                                <option value="90">3 Months (90 Days)</option>
+                                <option value="180">6 Months (180 Days)</option>
+                                <option value="365">1 Year (365 Days)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="membershipPrice">Price (Optional)</label>
+                            <input type="text" id="membershipPrice" name="membershipPrice" pattern="[0-9]*\.?[0-9]*"
+                                inputmode="decimal" placeholder="0.00">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Member Photos (5 Angles) *</label>
+                            <div class="photo-capture">
+                                <div class="video-container" style="position: relative;">
+                                    <video id="register-video" autoplay playsinline></video>
+                                    <div id="face-guide"
+                                        style="display:none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 3px solid #10b981; border-radius: 50%; width: 250px; height: 300px; z-index: 10; pointer-events: none;">
+                                    </div>
+                                    <div id="angle-instruction"
+                                        style="display:none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 15px 25px; border-radius: 10px; font-size: 18px; font-weight: bold; z-index: 11;">
+                                    </div>
+                                </div>
+                                <canvas id="register-canvas" style="display:none;"></canvas>
+                                <img id="register-preview" style="display:none;">
+
+                                <div class="capture-controls">
+                                    <button type="button" class="btn btn-secondary" onclick="startCamera()">
+                                        <i class="fas fa-camera"></i> Start Camera
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="capturePhoto()"
+                                        id="capture-btn" style="display:none;">
+                                        <i class="fas fa-camera-retro"></i> Capture Photos (5 Angles)
+                                    </button>
+                                    <button type="button" class="btn btn-warning" onclick="retakePhoto()"
+                                        id="retake-btn" style="display:none;">
+                                        <i class="fas fa-redo"></i> Retake
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Register Member
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="resetRegisterForm()">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Access Logs Section -->
+            <section id="access-logs-section" class="content-section">
+                <div class="section-header">
+                    <h3>Recent Access Attempts</h3>
+                    <button class="btn btn-secondary" onclick="loadAccessLogs()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div id="access-logs-container">
+                        <table class="data-table" id="logs-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Member</th>
+                                    <th>Status</th>
+                                    <th>Message</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-tbody">
+                                <tr>
+                                    <td colspan="4" class="loading">Loading access logs...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Angle Face Registration - Gym Security</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .header p {
+            color: var(--text-secondary);
+        }
+
+        .registration-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--text-secondary);
+            z-index: 0;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+            background: var(--card-bg);
+            padding: 0 10px;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .step.active .step-number {
+            background: var(--primary-color);
+        }
+
+        .step.completed .step-number {
+            background: var(--success-color);
+        }
+
+        .step-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--dark-bg);
+            border: 1px solid var(--text-secondary);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .camera-section {
+            text-align: center;
+        }
+
+        .video-container {
+            position: relative;
+            max-width: 640px;
+            margin: 0 auto 2rem;
+            border-radius: 12px;
+            overflow: hidden;
+            background: black;
+        }
+
+        #camera-video {
+            width: 100%;
+            display: block;
+        }
+
+        .face-guide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 350px;
+            border: 3px solid var(--primary-color);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .angle-instruction {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--warning-color);
+        }
+
+        .capture-progress {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .angle-box {
+            width: 80px;
+            height: 80px;
+            border: 2px solid var(--text-secondary);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--dark-bg);
+        }
+
+        .angle-box i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .angle-box.captured {
+            border-color: var(--success-color);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .angle-box.captured i {
+            color: var(--success-color);
+        }
+
+        .angle-label {
+            font-size: 0.75rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-secondary {
+            background: var(--text-secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #64748b;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        canvas {
+            display: none;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .success-message i {
+            font-size: 4rem;
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+
+        .success-message h2 {
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+
+        .captured-images {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .captured-images img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid var(--success-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-user-lock"></i> Multi-Angle Face Registration</h1>
+            <p>Register your face from multiple angles for better recognition accuracy</p>
+        </div>
+
+        <div class="registration-card">
+            <div class="step-indicator">
+                <div class="step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Info</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Capture</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Complete</div>
+                </div>
+            </div>
+
+            <!-- Step 1: Personal Information -->
+            <div class="form-section active" id="step-1">
+                <h2 style="margin-bottom: 1.5rem;">Personal Information</h2>
+                <div class="form-group">
+                    <label for="firstName">First Name *</label>
+                    <input type="text" id="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name *</label>
+                    <input type="text" id="lastName" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="nextStep()">
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Multi-Angle Capture -->
+            <div class="form-section" id="step-2">
+                <h2 style="margin-bottom: 1.5rem;">Face Capture</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem; text-align: center;">
+                    We'll capture your face from 5 different angles for better recognition
+                </p>
+
+                <div class="capture-progress">
+                    <div class="angle-box" id="angle-center">
+                        <i class="fas fa-user"></i>
+                        <div class="angle-label">Center</div>
+                    </div>
+                    <div class="angle-box" id="angle-left">
+                        <i class="fas fa-user"></i>
+                        <div class="angle-label">Left</div>
+                    </div>
+                    <div class="angle-box" id="angle-right">
+                        <i class="fas fa-user"></i>
+                        <div class="angle-label">Right</div>
+                    </div>
+                    <div class="angle-box" id="angle-up">
+                        <i class="fas fa-user"></i>
+                        <div class="angle-label">Up</div>
+                    </div>
+                    <div class="angle-box" id="angle-down">
+                        <i class="fas fa-user"></i>
+                        <div class="angle-label">Down</div>
+                    </div>
+                </div>
+
+                <div class="camera-section">
+                    <div class="video-container">
+                        <video id="camera-video" autoplay></video>
+                        <div class="face-guide"></div>
+                        <div class="angle-instruction" id="angle-instruction">Look at the center</div>
+                    </div>
+                    <canvas id="capture-canvas"></canvas>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="previousStep()">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button class="btn btn-success" id="capture-btn" onclick="startCapture()">
+                        <i class="fas fa-camera"></i> Start Capture
+                    </button>
+                    <button class="btn btn-primary" id="finish-btn" onclick="registerMember()" disabled>
+                        Finish Registration <i class="fas fa-check"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Success -->
+            <div class="form-section" id="step-3">
+                <div class="success-message">
+                    <i class="fas fa-check-circle"></i>
+                    <h2>Registration Successful!</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        Your face has been registered from multiple angles for accurate recognition
+                    </p>
+                    <div class="captured-images" id="captured-preview"></div>
+                    <div class="button-group">
+                        <button class="btn btn-primary" onclick="window.location.href='/scanner.html'">
+                            <i class="fas fa-qrcode"></i> Go to Scanner
+                        </button>
+                        <button class="btn btn-secondary" onclick="registerAnother()">
+                            <i class="fas fa-plus"></i> Register Another
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let videoStream = null;
+        let capturedImages = [];
+        let currentAngle = 0;
+        let isCapturing = false;
+
+        const angles = [
+            { id: 'center', instruction: 'Look straight at the camera' },
+            { id: 'left', instruction: 'Turn your head slightly LEFT' },
+            { id: 'right', instruction: 'Turn your head slightly RIGHT' },
+            { id: 'up', instruction: 'Tilt your head slightly UP' },
+            { id: 'down', instruction: 'Tilt your head slightly DOWN' }
+        ];
+
+        async function nextStep() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+
+            if (!firstName || !lastName || !email) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            currentStep++;
+            updateStepUI();
+
+            if (currentStep === 2) {
+                await startCamera();
+            }
+        }
+
+        function previousStep() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+            currentStep--;
+            updateStepUI();
+        }
+
+        function updateStepUI() {
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(`step-${currentStep}`).classList.add('active');
+
+            document.querySelectorAll('.step').forEach(step => {
+                const stepNum = parseInt(step.dataset.step);
+                step.classList.remove('active', 'completed');
+                if (stepNum === currentStep) {
+                    step.classList.add('active');
+                } else if (stepNum < currentStep) {
+                    step.classList.add('completed');
+                }
+            });
+        }
+
+        async function startCamera() {
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        facingMode: 'user'
+                    }
+                });
+                document.getElementById('camera-video').srcObject = videoStream;
+            } catch (error) {
+                let errorMsg = 'Camera access failed. ';
+                if (error.name === 'NotAllowedError') {
+                    errorMsg = 'Camera permission denied!\n\nHow to fix:\n1. Click the camera icon 🎥 in your browser address bar\n2. Select "Always allow" for this site\n3. Click "Try Again"\n\nTip: Use http://localhost:3000/multi-angle-register.html for best results';
+                } else if (error.name === 'NotFoundError') {
+                    errorMsg = 'No camera found on this device.';
+                } else if (error.name === 'NotReadableError') {
+                    errorMsg = 'Camera is being used by another application. Please close it and try again.';
+                } else {
+                    errorMsg += error.message;
+                }
+                alert(errorMsg);
+            }
+        }
+
+        async function startCapture() {
+            if (isCapturing) return;
+
+            isCapturing = true;
+            document.getElementById('capture-btn').disabled = true;
+            currentAngle = 0;
+            capturedImages = [];
+
+            // Start automatic capture sequence
+            captureAllAngles();
+        }
+
+        async function captureAllAngles() {
+            // Automatically capture all angles like a scanner
+            for (let i = 0; i < angles.length; i++) {
+                currentAngle = i;
+                const angle = angles[i];
+
+                // Update instruction
+                document.getElementById('angle-instruction').textContent = angle.instruction;
+
+                // Wait 1.5 seconds before capture
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                // Capture the image
+                captureImage(angle.id);
+
+                // Small delay after capture
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            // All angles captured
+            isCapturing = false;
+            document.getElementById('angle-instruction').textContent = 'All angles captured! ✓';
+            document.getElementById('finish-btn').disabled = false;
+        }
+
+        function captureImage(angleId) {
+            const video = document.getElementById('camera-video');
+            const canvas = document.getElementById('capture-canvas');
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+
+            const imageData = canvas.toDataURL('image/jpeg', 0.9);
+            capturedImages.push({ angle: angleId, data: imageData });
+
+            // Mark as captured
+            document.getElementById(`angle-${angleId}`).classList.add('captured');
+
+            // Flash effect
+            const container = document.querySelector('.video-container');
+            container.style.border = '4px solid var(--success-color)';
+            setTimeout(() => {
+                container.style.border = 'none';
+            }, 200);
+        }
+
+        async function registerMember() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+
+            const formData = new FormData();
+            formData.append('firstName', firstName);
+            formData.append('lastName', lastName);
+            formData.append('email', email);
+            formData.append('membershipType', 'standard');
+
+            // Convert first image to blob and append as photo
+            const blob = await fetch(capturedImages[0].data).then(r => r.blob());
+            formData.append('photo', blob, 'photo.jpg');
+
+            try {
+                // Register member (without authentication for quick registration)
+                console.log('Registering member...');
+                const response = await fetch('/api/members/register-quick', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Registration error:', errorText);
+                    throw new Error('Registration failed: ' + errorText);
+                }
+
+                const result = await response.json();
+                const memberId = result.memberId;
+                console.log('Member registered with ID:', memberId);
+
+                // Register all face angles
+                console.log('Registering face angles...');
+                for (const img of capturedImages) {
+                    console.log(`Registering angle: ${img.angle}`);
+                    const faceResponse = await fetch('http://localhost:5001/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            member_id: memberId,
+                            name: `${firstName} ${lastName}`,
+                            image: img.data,
+                            angle: img.angle
+                        })
+                    });
+
+                    if (!faceResponse.ok) {
+                        const errorText = await faceResponse.text();
+                        console.error(`Failed to register ${img.angle}:`, errorText);
+                        throw new Error(`Failed to register ${img.angle}: ${errorText}`);
+                    }
+
+                    const faceResult = await faceResponse.json();
+                    console.log(`${img.angle} registered:`, faceResult);
+                }
+
+                console.log('All angles registered successfully!');
+
+                // ✨ NEW: Trigger data augmentation
+                console.log('Starting data augmentation...');
+                const trainResponse = await fetch('http://localhost:5001/train', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        member_id: memberId,
+                        name: `${firstName} ${lastName}`,
+                        augmentations: 10  // 10 versions per angle = 55 total images
+                    })
+                });
+
+                if (!trainResponse.ok) {
+                    console.warn('Augmentation failed, but registration succeeded');
+                } else {
+                    const trainResult = await trainResponse.json();
+                    console.log('✅ Training complete:', trainResult);
+                    alert(`Success! Generated ${trainResult.total_images} training images`);
+                }
+
+                // Show captured images preview
+                const preview = document.getElementById('captured-preview');
+                preview.innerHTML = capturedImages.map(img =>
+                    `<img src="${img.data}" alt="${img.angle}">`
+                ).join('');
+
+                // Stop camera
+                if (videoStream) {
+                    videoStream.getTracks().forEach(track => track.stop());
+                }
+
+                currentStep = 3;
+                updateStepUI();
+
+            } catch (error) {
+                console.error('Registration failed:', error);
+                alert('Registration failed: ' + error.message + '\n\nCheck browser console (F12) for details.');
+            }
+        }
+
+        function registerAnother() {
+            window.location.reload();
+        }
+    </script>
+</body>
+
+</html>

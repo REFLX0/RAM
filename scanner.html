@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Security - Face Scanner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/scanner.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="scanner-body">
+    <div class="scanner-container">
+        <!-- Header -->
+        <header class="scanner-header">
+            <div class="logo">
+                <i class="fas fa-shield-halved"></i>
+                <h1>Gym Security Access Scanner</h1>
+            </div>
+            <a href="admin.html" class="btn btn-secondary">
+                <i class="fas fa-cog"></i> Admin Dashboard
+            </a>
+        </header>
+
+        <!-- Main Scanner Area -->
+        <div class="scanner-content">
+            <div class="scanner-grid">
+                <!-- Video Feed -->
+                <div class="scanner-video-section">
+                    <div class="video-container">
+                        <video id="scanner-video" autoplay playsinline></video>
+                        <canvas id="scanner-canvas" style="display: none;"></canvas>
+                        
+                        <!-- Face Frame Overlay -->
+                        <div class="video-overlay">
+                            <div class="face-frame"></div>
+                        </div>
+
+                        <!-- Scanning Indicator -->
+                        <div id="scanning-indicator" class="scanning-indicator" style="display: none;">
+                            <div class="spinner"></div>
+                            <p>Scanning...</p>
+                        </div>
+                    </div>
+
+                    <!-- Scanner Controls -->
+                    <div class="scanner-controls">
+                        <button id="start-scan-btn" class="btn btn-primary btn-large" onclick="startScanning()">
+                            <i class="fas fa-play"></i> Start Scanner
+                        </button>
+                        <button id="stop-scan-btn" class="btn btn-danger btn-large" onclick="stopScanning()" style="display: none;">
+                            <i class="fas fa-stop"></i> Stop Scanner
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Panel -->
+                <div class="scanner-results-section">
+                    <!-- Verification Result -->
+                    <div class="result-card">
+                        <h2>Access Verification</h2>
+                        <div id="verification-result" class="verification-result">
+                            <div class="result-idle">
+                                <i class="fas fa-user-shield"></i>
+                                <p>Ready to scan</p>
+                                <small>Position your face within the frame</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Access -->
+                    <div class="result-card">
+                        <h2>Recent Access</h2>
+                        <div id="recent-access-list" class="recent-access-list">
+                            <p class="no-data">No recent access attempts</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-item">
+                <i class="fas fa-calendar"></i>
+                <span id="current-date">Loading...</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-clock"></i>
+                <span id="current-time">Loading...</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
+                <span>Today: <span id="today-granted">0</span> granted</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-times-circle" style="color: var(--danger-color);"></i>
+                <span>Today: <span id="today-denied">0</span> denied</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Audio Elements -->
+    <audio id="success-sound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp7KdXEgtMo+DwumgdBjiP1vPPejAGI3fI8N2SQwoUXrTp6qpZEglLouDwuWkdBjmP1vPPejAGI3fI8NySQwoUXLPp6qpZEglLouDwuWkdBjmP1vPPejAGI3fI8NySQwoUXLPp6qpZEglLouDwuWkdBjmP1vPPejAGI3fI8NySQwoUXLPp6qpZEglLouDwuWkdBjmP1vPPejAGI3fI8NySQwoUXLPp6qpZEglLouDwuWkdBjmP1vPPejAGI3fI8NySQwoUXLPp6qpZEglLouDwuWkdBjmP1vPPejAGI3fI8NySQwoUXLPp6qpZEglLouDwuWkdBjmP1vPPejAGI3fI8NySQwoUXLPp6qpZEglLouDwuWkdBjmP1vPPejAGI3fI8NySQwoUXLPp6qpZEglLouDwuWkdBjmP1vPPejAGI3fI8NySQwoUXLPp6qpZEg==" type="audio/wav">
+    </audio>
+    <audio id="error-sound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBiYqJaVlZa5WwsJlgNTBdoNPbq2EcBj+c3PPEcSQELIPP8tmKNgcYabzu6J5NEAxQqOTwtWMcBjiS2PTNeSsEJHjI8d+RQAoUXrXq7KdYEgtMpOLyu2kdBjiQ1/TPeS8GI3fJ8d6RQgoUXbTq7KlZEglLo+LyumgdBjmP1/TPeS8GI3fJ8d6RQgoUXbTq7KlZEglLo+LyumgdBjmP1/TPeS8GI3fJ8d6RQgoUXbTq7KlZEglLo+LyumgdBjmP1/TPeS8GI3fJ8d6RQgoUXbTq7KlZEglLo+LyumgdBjmP1/TPeS8GI3fJ8d6RQgoUXbTq7KlZEglLo+LyumgdBjmP1/TPeS8GI3fJ8d6RQgoUXbTq7KlZEglLo+LyumgdBjmP1/TPeS8GI3fJ8d6RQgoUXbTq7KlZEglLo+LyumgdBjmP1/TPeS8GI3fJ8d6RQgoUXbTq7KlZEglLo+LyumgdBjmP1/TPeS8GI3fJ8d6RQgoUXbTq7KlZEg==" type="audio/wav">
+    </audio>
+
+    <script src="config.js"></script>
+    <script src="js/scanner.js"></script>
+</body>
+</html>
